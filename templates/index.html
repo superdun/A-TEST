@@ -1,0 +1,156 @@
+﻿{% extends "base.html" %} 
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-3 left">
+	  <h2 align='center'>DOW</h2>
+		<div id='l0' align='center'>
+			<img></img>
+			<a href='#'></a>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+		</div>
+		<div id='l1'>
+			<img></img>
+			<a href='#'></a>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+		</div>
+		<div id='l2'>
+			<img></img>
+			<a href='#'></a>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+		</div>
+	</div>
+	
+	<div class="col-md-6 mid">
+	  <div align='center'>
+		<p id='msg'></p>
+		<img class='img-responsive' id='show_pic' src="{{url_for('static', filename='pic.jpg')}}">
+		<form enctype=multipart/form-data class='iform' action="/upload" method='post'>
+			<input type='file' name='file'>
+			<input type='submit' value='Upload' id='upload'>
+		</form>
+	  </div>
+	</div>
+	
+	<div class="col-md-3 right" >
+	  <h2 align='center'>NASDAQ</h2>
+		<div id='r0'>
+			<img></img>
+			<a href='#'></a>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>			
+		</div>
+		<div id='r1'>
+			<img></img>
+			<a href='#'></a>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>			
+		</div>
+		<div id='r2'>
+			<img></img>
+			<a href='#'></a>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>
+			<p></p>			
+		</div>
+	</div>
+  </div>
+</div>
+{% endblock %} 
+{% block script %}
+get_stock()
+setInterval('get_stock()',5500)     //id,last_trade,stock_name,change,img,vol,name
+function get_stock(){
+	$.getJSON( '/container_ajax', {source:'dow',}, function(data) {
+		for (var i=0;i<3;i++){//3为首页侧边显示条数
+			
+			$('#l'+i.toString()+' img').attr('src',data.back_to_front[i][0][4])
+			$('#l'+i.toString()).find('a').attr('href','https://finance.yahoo.com/q?s='+data.back_to_front[i][0][0]).text(data.back_to_front[i][0][2])
+			
+			$('#l'+i.toString()+' p:eq(0)').text('最新交易:'+data.back_to_front[i][0][3])
+			$('#l'+i.toString()+' p:eq(1)').text('变化:'+data.back_to_front[i][0][5])
+			if(data.back_to_front[i][0][5][0]=='+'){
+				$('#l'+i.toString()+' p:eq(1)').css('color','red')
+			}
+			else{
+				$('#l'+i.toString()+' p:eq(1)').css('color','green')
+			}
+			$('#l'+i.toString()+' p:eq(2)').text('价值'+data.back_to_front[i][0][6])
+		}
+		
+	})
+	$.getJSON( '/container_ajax', {source:'nasdaq',}, function(data) {
+		for (var i=0;i<3;i++){//3为首页侧边显示条数
+			
+			$('#r'+i.toString()+' img').attr('src',data.back_to_front[i][0][4])
+			$('#l'+i.toString()).find('a').attr('href','https://finance.yahoo.com/q?s='+data.back_to_front[i][0][0]).text(data.back_to_front[i][0][2])
+			$('#r'+i.toString()+' p:eq(0)').text('最新交易:'+data.back_to_front[i][0][3])
+			$('#r'+i.toString()+' p:eq(1)').text(data.back_to_front[i][0][5])
+			if(data.back_to_front[i][0][5][0]=='+'){
+				$('#r'+i.toString()+' p:eq(1)').css('color','red')
+			}
+			else{
+				$('#r'+i.toString()+' p:eq(1)').css('color','green')
+			}
+			$('#r'+i.toString()+' p:eq(2)').text(data.back_to_front[i][0][6])
+		}
+	})
+	$(function(){ 
+    var options = {  
+        beforeSubmit:  showRequest,  //AJAX实现图片上传提交前处理 
+        success:       showResponse,  //处理完成 
+        resetForm: true,  
+        dataType:  'json'  
+    };  
+  
+    $('#iform').submit(function() {  
+        $(this).ajaxSubmit(options);  
+    });  
+	function showRequest(formData, jqForm, options) {  
+    var file = $("#file").val(); 
+    if(uname==""){ 
+        $("#msg").text("请选择图片"); 
+        return false; 
+    } 
+     
+    $('#upload').val("正在提交..."); 
+    $('#upload').attr("disabled",true) 
+     
+    return true;  
+	}  
+  
+	function showResponse(responseText, statusText)  {  
+    $("#msg").html('提交成功'); 
+	$('#upload').attr("disabled",false)
+    var sex = responseText.sex==1?"男":"女"; 
+    $("#output").html("姓名："+responseText.uname+" 性别："+sex+" 年龄："+responseText.age); 
+	}  
+}); 
+}
+{% endblock %}
