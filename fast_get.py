@@ -1,6 +1,6 @@
 ﻿#coding=utf-8
 from pyquery import PyQuery as pq
-import sqlite3
+import sqlite3,os
 def get_stock_name(stocksindex,cursor):
 	stock_dict={}
 	for i in stocksindex:
@@ -58,10 +58,15 @@ def get_stock_inform(stock_name,cursor):
 			finally:
 				id+=1
 				print url
-stocksindex=['DJI','IXIC']
-db= sqlite3.connect('tst.db')
-cursor = db.cursor()
-get_stock_name(stocksindex,cursor)#dont do get_stock_inform,get the inform from index page directly,the 'get_stock_inform' is just a api
-cursor.close()
-db.commit()
-db.close()
+def run():
+	stocksindex=['DJI','IXIC']
+	db= sqlite3.connect('tst.db')
+	cursor = db.cursor()
+	get_stock_name(stocksindex,cursor)#dont do get_stock_inform,get the inform from index page directly,the 'get_stock_inform' is just a api
+	cursor.close()
+	db.commit()
+	db.close()
+while 1:
+	run()
+	os.remove('test.db')
+	os.rename('tst.db','test.db')

@@ -38,11 +38,12 @@
 	
 	<div class="col-md-6 mid">
 	  <div align='center'>
-		<p id='msg'></p>
-		<img class='img-responsive' id='show_pic' src="{{url_for('static', filename='pic.jpg')}}">
-		<form enctype=multipart/form-data class='iform' action="/upload" method='post'>
-			<input type='file' name='file'>
-			<input type='submit' value='Upload' id='upload'>
+		
+		<img width='300' height='400' id='show_pic' src="{{url_for('static', filename='pic.jpg')}}" >
+		<div class="alert alert-danger" role="alert">请正确地选择图片！</div>
+		<form enctype=multipart/form-data id='iform' action="/upload" method='post'>
+			<input type='file' name='file' id='file'>
+			<input type='submit' value='上传' class="btn btn-primary" id='upload'>
 		</form>
 	  </div>
 	</div>
@@ -109,33 +110,40 @@ function get_stock(){
 		for (var i=0;i<3;i++){//3为首页侧边显示条数
 			
 			$('#r'+i.toString()+' img').attr('src',data.back_to_front[i][0][4])
-			$('#l'+i.toString()).find('a').attr('href','https://finance.yahoo.com/q?s='+data.back_to_front[i][0][0]).text(data.back_to_front[i][0][2])
+			$('#r'+i.toString()).find('a').attr('href','https://finance.yahoo.com/q?s='+data.back_to_front[i][0][0]).text(data.back_to_front[i][0][2])
 			$('#r'+i.toString()+' p:eq(0)').text('最新交易:'+data.back_to_front[i][0][3])
-			$('#r'+i.toString()+' p:eq(1)').text(data.back_to_front[i][0][5])
+			$('#r'+i.toString()+' p:eq(1)').text('变化:'+data.back_to_front[i][0][5])
 			if(data.back_to_front[i][0][5][0]=='+'){
 				$('#r'+i.toString()+' p:eq(1)').css('color','red')
 			}
 			else{
 				$('#r'+i.toString()+' p:eq(1)').css('color','green')
 			}
-			$('#r'+i.toString()+' p:eq(2)').text(data.back_to_front[i][0][6])
+			$('#r'+i.toString()+' p:eq(2)').text('价值:'+data.back_to_front[i][0][6])
 		}
 	})
-	$(function(){ 
+}; 
+
+$(document).ready(function(){ 
+	$('.alert').hide()
     var options = {  
         beforeSubmit:  showRequest,  //AJAX实现图片上传提交前处理 
         success:       showResponse,  //处理完成 
         resetForm: true,  
-        dataType:  'json'  
+        dataType:  'json'  ,
+		type:'post'
     };  
   
-    $('#iform').submit(function() {  
-        $(this).ajaxSubmit(options);  
-    });  
+    $('#iform').submit(function(e) {  
+		e.preventDefault()
+        $(this).ajaxSubmit(options); 	
+		return false;		
+    }); 
+})	
 	function showRequest(formData, jqForm, options) {  
     var file = $("#file").val(); 
-    if(uname==""){ 
-        $("#msg").text("请选择图片"); 
+    if(file==""){ 
+        $('.alert').show(100)
         return false; 
     } 
      
@@ -145,12 +153,18 @@ function get_stock(){
     return true;  
 	}  
   
-	function showResponse(responseText, statusText)  {  
-    $("#msg").html('提交成功'); 
-	$('#upload').attr("disabled",false)
-    var sex = responseText.sex==1?"男":"女"; 
-    $("#output").html("姓名："+responseText.uname+" 性别："+sex+" 年龄："+responseText.age); 
+	function showResponse(responseText, statusText)  { 
+	if (responseText.filename!=''){
+		$('#upload').attr('class','btn btn-success').val("上传成功！");
+		$('.alert').hide()
+		var filefolder='{{url_for('static', filename='uploaded_pics/')}}'+responseText.filename
+		$("#show_pic").attr("src",'{{url_for('static', filename='uploaded_pics/')}}'+responseText.filename); 
 	}  
-}); 
-}
+	else{
+		$('.alert').show(100)
+		$('#upload').val("上传");
+		$('#upload').attr("disabled",false)
+		}
+	}
+
 {% endblock %}

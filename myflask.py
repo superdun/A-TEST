@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask,render_template ,url_for,jsonify,request
 from flask.ext.bootstrap import Bootstrap
-import sqlite3,os,time 
+import sqlite3,os
 from werkzeug import secure_filename
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -24,7 +24,7 @@ l_count=r_count=0
 def apply_ajax():
 	global l_count,r_count
 	back_to_front=[]
-	db= sqlite3.connect('tst.db')
+	db= sqlite3.connect('test.db')
 	cursor = db.cursor()
 	if request.args.get('source')=='dow':
 		for i in range(3):
@@ -46,6 +46,7 @@ def apply_ajax():
 	cursor.close()
 	db.commit()
 	db.close()
+
 	return jsonify(back_to_front=back_to_front)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS	
@@ -58,8 +59,10 @@ def upload_file():
 			filename = secure_filename(file.filename)
 			print app.config['UPLOAD_FOLDER']
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-			return 
+			return jsonify(filename=filename)
+		else:
+			return jsonify(filename='')
+		
 
-	
 if __name__ == '__main__':
 	app.run(port=8080,debug=True)
